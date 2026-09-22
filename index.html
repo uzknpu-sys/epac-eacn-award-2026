@@ -1,1 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Preventing Corruption Before It Starts — EPAC/EACN Award 2026</title>
+<style>
+:root {
+  --bg:#050b13; --bg2:#081522; --ink:#f4f8fb; --muted:#9eb2c3;
+  --cyan:#55d8ff; --gold:#f0c96b; --green:#6ee7b7; --line:rgba(255,255,255,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:var(--ink);
+font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+body{user-select:none}
+#deck{position:fixed;inset:0;background:radial-gradient(circle at 75% 25%,#0c2437 0,#07111c 35%,#03070c 75%)}
+.scene{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .65s ease;overflow:hidden}
+.scene.active{opacity:1;pointer-events:auto}
+.video-scene{background:#000}
+.video-scene video{width:100%;height:100%;object-fit:cover;display:block}
+.slide{padding:6.2vh 7vw 5vh;display:flex;flex-direction:column;justify-content:center}
+.slide:before{content:"";position:absolute;inset:-20%;background:
+radial-gradient(circle at 20% 30%,rgba(85,216,255,.10),transparent 30%),
+radial-gradient(circle at 80% 75%,rgba(240,201,107,.07),transparent 27%);
+filter:blur(10px);animation:drift 12s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(3vw,-2vh,0) scale(1.04)}}
+.content{position:relative;z-index:2;max-width:1500px;width:100%;margin:auto}
+.kicker{font-size:clamp(12px,1.05vw,20px);letter-spacing:.24em;text-transform:uppercase;color:var(--cyan);font-weight:700;margin-bottom:2.4vh}
+h1,h2,p{margin:0}
+h1{font-size:clamp(48px,6.2vw,112px);line-height:.92;letter-spacing:-.055em;font-weight:780}
+h2{font-size:clamp(38px,4.7vw,82px);line-height:.98;letter-spacing:-.045em}
+.sub{font-size:clamp(18px,1.65vw,30px);line-height:1.45;color:var(--muted);max-width:1050px;margin-top:3vh}
+.accent{color:var(--cyan)} .gold{color:var(--gold)} .green{color:var(--green)}
+.rule{height:1px;background:linear-gradient(90deg,var(--cyan),transparent);margin:4vh 0 0;width:0}
+.active .rule{animation:grow 1.1s .35s forwards} @keyframes grow{to{width:100%}}
 
+.path{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2vw;margin-top:7vh;position:relative}
+.path:before{content:"";position:absolute;left:6%;right:6%;top:30px;height:2px;background:rgba(255,255,255,.13)}
+.node{position:relative;text-align:center;opacity:0;transform:translateY(25px)}
+.node .dot{width:18px;height:18px;border-radius:50%;background:var(--cyan);box-shadow:0 0 26px rgba(85,216,255,.65);margin:22px auto 26px;position:relative;z-index:2}
+.node strong{font-size:clamp(15px,1.4vw,25px);letter-spacing:.04em}
+.active .node{animation:rise .65s forwards}
+.active .node:nth-child(1){animation-delay:.35s} .active .node:nth-child(2){animation-delay:.75s}
+.active .node:nth-child(3){animation-delay:1.15s} .active .node:nth-child(4){animation-delay:1.55s}
+@keyframes rise{to{opacity:1;transform:none}}
+
+.journey{display:flex;gap:1.4vw;margin-top:6vh;align-items:stretch}
+.card{flex:1;border:1px solid var(--line);background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+border-radius:24px;padding:2.2vw;min-height:240px;opacity:0;transform:translateY(35px) scale(.98);backdrop-filter:blur(10px)}
+.card .num{font-size:13px;letter-spacing:.2em;color:var(--cyan);margin-bottom:5vh}
+.card h3{font-size:clamp(24px,2.2vw,39px);line-height:1.05;margin:0 0 1.6vh}
+.card p{color:var(--muted);font-size:clamp(14px,1.05vw,19px);line-height:1.5}
+.active .card{animation:cardIn .7s forwards}
+.active .card:nth-child(1){animation-delay:.3s} .active .card:nth-child(2){animation-delay:.7s} .active .card:nth-child(3){animation-delay:1.1s}
+@keyframes cardIn{to{opacity:1;transform:none}}
+
+.metric-wrap{display:grid;grid-template-columns:.9fr 1.1fr;align-items:center;gap:5vw}
+.big119{font-size:clamp(150px,22vw,390px);line-height:.72;font-weight:850;letter-spacing:-.09em;color:transparent;
+-webkit-text-stroke:2px rgba(85,216,255,.9);filter:drop-shadow(0 0 28px rgba(85,216,255,.18))}
+.metric-side{display:grid;grid-template-columns:1fr 1fr;gap:1.1vw}
+.pill{border-left:2px solid var(--cyan);padding:1.4vh 1.3vw;background:rgba(255,255,255,.025);opacity:0;transform:translateX(30px)}
+.pill b{display:block;font-size:clamp(18px,1.5vw,27px);margin-bottom:.3vh} .pill span{color:var(--muted);font-size:14px}
+.active .pill{animation:slideIn .55s forwards}
+.active .pill:nth-child(1){animation-delay:.4s} .active .pill:nth-child(2){animation-delay:.7s}
+.active .pill:nth-child(3){animation-delay:1s} .active .pill:nth-child(4){animation-delay:1.3s}
+@keyframes slideIn{to{opacity:1;transform:none}}
+
+.shift{display:grid;grid-template-columns:1fr 100px 1fr;align-items:center;gap:2vw;margin-top:6vh}
+.sidebox{border:1px solid var(--line);border-radius:28px;padding:3vw;min-height:330px;position:relative;overflow:hidden}
+.sidebox.old{opacity:.58} .sidebox.new{box-shadow:0 0 70px rgba(85,216,255,.10)}
+.sidebox h3{font-size:clamp(30px,3vw,55px);margin:0 0 3vh}
+.flow{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:10px 14px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-size:clamp(12px,1vw,18px)}
+.new .chip{color:var(--ink);border-color:rgba(85,216,255,.28);background:rgba(85,216,255,.06)}
+.arrow{font-size:60px;text-align:center;color:var(--cyan);opacity:0;transform:translateX(-20px)}
+.active .arrow{animation:arrowGo .8s .7s forwards} @keyframes arrowGo{to{opacity:1;transform:none}}
+.quote{margin-top:4vh;font-size:clamp(24px,2.4vw,43px);font-weight:650;letter-spacing:-.02em;opacity:0}
+.active .quote{animation:fadeUp .8s 1.2s forwards} @keyframes fadeUp{to{opacity:1;transform:none}}
+
+.world{position:relative;height:47vh;margin-top:2vh}
+.ua{position:absolute;left:10%;top:35%;font-size:clamp(60px,8vw,140px);font-weight:850;letter-spacing:-.06em;color:var(--cyan);
+text-shadow:0 0 40px rgba(85,216,255,.25)}
+.rings{position:absolute;left:22%;top:47%;width:40vw;height:40vw;max-width:650px;max-height:650px;transform:translate(-50%,-50%)}
+.ring{position:absolute;inset:45%;border:1px solid rgba(85,216,255,.35);border-radius:50%;opacity:0}
+.active .ring:nth-child(1){animation:pulse 3s .3s infinite} .active .ring:nth-child(2){animation:pulse 3s 1.1s infinite}
+.active .ring:nth-child(3){animation:pulse 3s 1.9s infinite}
+@keyframes pulse{0%{inset:45%;opacity:.8}100%{inset:0;opacity:0}}
+.travel{position:absolute;right:2%;top:20%;width:54%;font-size:clamp(36px,4.8vw,84px);font-weight:760;line-height:1;letter-spacing:-.05em}
+.travel span{display:block;opacity:0;transform:translateX(50px)} .active .travel span{animation:slideIn .8s forwards}
+.active .travel span:nth-child(1){animation-delay:.5s} .active .travel span:nth-child(2){animation-delay:1.1s}
+.micro{position:absolute;right:2%;bottom:9%;width:54%;font-size:clamp(15px,1.2vw,22px);color:var(--muted);line-height:1.5}
+
+#progress{position:fixed;z-index:50;left:0;bottom:0;height:3px;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));box-shadow:0 0 14px rgba(85,216,255,.55)}
+#hud{position:fixed;z-index:60;right:18px;top:16px;font-size:12px;letter-spacing:.12em;color:rgba(255,255,255,.48);opacity:0;transition:opacity .25s}
+body:hover #hud{opacity:1}
+#start{position:fixed;z-index:100;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,#102438,#03070c 65%)}
+.startbox{text-align:center;max-width:780px;padding:40px}
+.startbox h2{font-size:clamp(38px,5vw,78px);margin-bottom:18px}
+.startbox p{color:var(--muted);font-size:18px;line-height:1.55}
+.startbox button{margin-top:28px;border:1px solid rgba(85,216,255,.55);background:rgba(85,216,255,.09);color:white;border-radius:999px;padding:16px 28px;font-size:16px;letter-spacing:.08em;cursor:pointer}
+.startbox button:hover{background:rgba(85,216,255,.18)}
+.hint{margin-top:20px!important;font-size:13px!important;color:#718696!important}
+#pauseBadge{position:fixed;z-index:70;left:50%;top:20px;transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.65);font-size:12px;letter-spacing:.16em;display:none}
+
+/* v2: responsive English layout fixes */
+.slide5 .s5content{height:100%;display:flex;flex-direction:column;justify-content:center}
+.s5grid{display:grid;grid-template-columns:34% 1fr;gap:5vw;align-items:center;min-height:58vh}
+.s5left{position:relative;min-height:360px;display:flex;flex-direction:column;justify-content:center;padding-left:2vw}
+.s5label{position:relative;z-index:3;font-size:clamp(54px,7.2vw,124px);font-weight:850;letter-spacing:-.06em;color:var(--cyan);line-height:.9}
+.s5small{position:relative;z-index:3;margin-top:3.2vh;max-width:430px;color:var(--muted);font-size:clamp(14px,1.15vw,20px);line-height:1.5}
+.s5pulse{position:absolute;left:14%;top:50%;width:min(30vw,470px);aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none}
+.s5pulse i{position:absolute;inset:47%;border:1px solid rgba(85,216,255,.34);border-radius:50%;opacity:0}
+.slide5.active .s5pulse i:nth-child(1){animation:s5pulse 3s .2s infinite}
+.slide5.active .s5pulse i:nth-child(2){animation:s5pulse 3s 1s infinite}
+.slide5.active .s5pulse i:nth-child(3){animation:s5pulse 3s 1.8s infinite}
+@keyframes s5pulse{0%{inset:47%;opacity:.7}100%{inset:2%;opacity:0}}
+.s5right{position:relative;z-index:4;padding-right:1vw}
+.s5line{font-size:clamp(38px,4.8vw,82px);font-weight:780;line-height:.92;letter-spacing:-.05em;opacity:0;transform:translateX(38px);white-space:nowrap}
+.s5gap{margin-top:3.2vh}
+.slide5.active .s5line{animation:s5in .72s forwards}
+.slide5.active .s5line:nth-child(1){animation-delay:.35s}
+.slide5.active .s5line:nth-child(2){animation-delay:.72s}
+.slide5.active .s5line:nth-child(3){animation-delay:1.09s}
+.slide5.active .s5line:nth-child(4){animation-delay:1.46s}
+@keyframes s5in{to{opacity:1;transform:none}}
+.s5note{margin-top:4vh;max-width:780px;color:var(--muted);font-size:clamp(14px,1.1vw,20px);line-height:1.5;opacity:0}
+.slide5.active .s5note{animation:fadeUp .7s 1.9s forwards}
+@media(max-width:1050px){
+  .slide{padding:5vh 5.5vw 4vh}
+  .s5grid{grid-template-columns:30% 1fr;gap:4vw}
+  .s5line{font-size:clamp(32px,4.5vw,60px)}
+}
+@media(max-width:760px){
+  .s5grid{grid-template-columns:1fr;gap:2vh}
+  .s5left{min-height:180px;padding-left:0}
+  .s5pulse{left:12%;width:260px}
+  .s5line{white-space:normal}
+}
+
+</style>
+</head>
+<body>
+<div id="deck">
+
+<section class="scene video-scene active" data-duration="10">
+<video id="v1" playsinline preload="auto">
+<source src="video1.mp4" type="video/mp4">
+</video>
+</section>
+
+<section class="scene slide" data-duration="26">
+<div class="content">
+<div class="kicker">01 · Before it starts</div>
+<h1>INTEGRITY<br><span class="accent">STARTS HERE.</span></h1>
+<p class="sub">Move prevention upstream — before authority, budgets and high-stakes decisions enter a person's life.</p>
+<div class="rule"></div>
+<div class="path">
+<div class="node"><div class="dot"></div><strong>SCHOOL</strong></div>
+<div class="node"><div class="dot"></div><strong>VOCATIONAL EDUCATION</strong></div>
+<div class="node"><div class="dot"></div><strong>UNIVERSITY</strong></div>
+<div class="node"><div class="dot"></div><strong>SOCIETY</strong></div>
+</div>
+</div>
+</section>
+
+<section class="scene slide" data-duration="28">
+<div class="content">
+<div class="kicker">02 · One integrity journey</div>
+<h2>From isolated initiatives to a <span class="accent">single pathway.</span></h2>
+<div class="journey">
+<div class="card"><div class="num">01</div><h3>Transparent<br>School</h3><p>Integrity values become part of everyday learning and school culture.</p></div>
+<div class="card"><div class="num">02</div><h3>Transparent<br>Vocational Education</h3><p>Ethical choices connect directly with professional identity and practice.</p></div>
+<div class="card"><div class="num">03</div><h3>Transparent<br>Universities</h3><p>Integrity becomes an institutional norm before graduates enter public and professional life.</p></div>
+</div>
+</div>
+</section>
+
+<section class="scene slide" data-duration="30">
+<div class="content metric-wrap">
+<div>
+<div class="kicker">03 · Vision becomes implementation</div>
+<div class="big119" id="counter">0</div>
+<p class="sub"><b style="color:white">measurable actions</b> turn values into accountable implementation.</p>
+</div>
+<div class="metric-side">
+<div class="pill"><b>Responsible institution</b><span>Clear ownership</span></div>
+<div class="pill"><b>Deadline</b><span>Time-bound delivery</span></div>
+<div class="pill"><b>Status</b><span>Visible progress</span></div>
+<div class="pill"><b>Monitoring</b><span>Accountability by design</span></div>
+</div>
+</div>
+</section>
+
+<section class="scene slide" data-duration="38">
+<div class="content">
+<div class="kicker">04 · The strategic shift</div>
+<h2>Not only fighting corruption.<br><span class="accent">Reducing the chance it begins.</span></h2>
+<div class="shift">
+<div class="sidebox old"><h3>REACT</h3><div class="flow"><span class="chip">Violation</span><span class="chip">Detection</span><span class="chip">Investigation</span><span class="chip">Sanction</span></div></div>
+<div class="arrow">→</div>
+<div class="sidebox new"><h3>PREVENT</h3><div class="flow"><span class="chip">Education</span><span class="chip">Values</span><span class="chip">Culture</span><span class="chip">Behaviour</span></div></div>
+</div>
+<div class="quote">“The most sustainable prevention happens <span class="green">before the corrupt act exists.</span>”</div>
+</div>
+</section>
+
+<section class="scene slide slide5" data-duration="38">
+<div class="content s5content">
+  <div class="kicker">05 · From Ukraine to a transferable model</div>
+  <div class="s5grid">
+    <div class="s5left">
+      <div class="s5label">UKRAINE</div>
+      <div class="s5pulse"><i></i><i></i><i></i></div>
+      <p class="s5small">A practical model for strengthening prevention through formal education.</p>
+    </div>
+    <div class="s5right">
+      <div class="s5line">A MODEL DESIGNED</div>
+      <div class="s5line accent">IN UKRAINE.</div>
+      <div class="s5line s5gap">A MODEL THAT</div>
+      <div class="s5line gold">CAN TRAVEL.</div>
+      <p class="s5note">Coordinated by NACP with the Ministry of Education and Science and education-sector stakeholders.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="scene video-scene" data-duration="10">
+<video id="v2" playsinline preload="auto">
+<source src="video2.mp4" type="video/mp4">
+</video>
+</section>
+
+<div id="progress"></div>
+<div id="hud">SPACE / → NEXT · ← BACK · P PAUSE · R RESTART · F FULLSCREEN</div>
+<div id="pauseBadge">PAUSED</div>
+
+<div id="start">
+<div class="startbox">
+<div class="kicker">EPAC / EACN AWARD 2026 · UKRAINE</div>
+<h2>Preventing Corruption<br><span class="accent">Before It Starts</span></h2>
+<p>Integrity in Education Development Strategy 2026–2030</p>
+<button id="startBtn">START PRESENTATION</button>
+<p class="hint">Click once to enable video sound. The 3:00 presentation will then run automatically.</p>
+</div>
+</div>
+</div>
+
+<script>
+const scenes=[...document.querySelectorAll('.scene')];
+const durations=scenes.map(s=>Number(s.dataset.duration));
+const total=durations.reduce((a,b)=>a+b,0); // 180
+let idx=0, elapsedBefore=0, sceneStart=0, paused=false, pauseAt=0, timer=null, running=false;
+
+const v1=document.getElementById('v1'), v2=document.getElementById('v2');
+const progress=document.getElementById('progress'), pauseBadge=document.getElementById('pauseBadge');
+
+function resetAnimations(scene){
+  scene.classList.remove('active');
+  void scene.offsetWidth;
+  scene.classList.add('active');
+}
+function count119(){
+  const el=document.getElementById('counter');
+  if(!scenes[idx].contains(el)) return;
+  let start=null, dur=1300;
+  function step(t){
+    if(!start) start=t;
+    const p=Math.min(1,(t-start)/dur);
+    const eased=1-Math.pow(1-p,3);
+    el.textContent=Math.round(119*eased);
+    if(p<1) requestAnimationFrame(step);
+  }
+  el.textContent='0'; requestAnimationFrame(step);
+}
+function stopVideos(){
+  [v1,v2].forEach(v=>{ if(v && !v.paused) v.pause(); });
+}
+function activate(i, fromManual=false){
+  clearTimeout(timer); stopVideos();
+  idx=Math.max(0,Math.min(scenes.length-1,i));
+  scenes.forEach((s,j)=>s.classList.toggle('active',j===idx));
+  resetAnimations(scenes[idx]);
+  count119();
+  sceneStart=performance.now();
+  if(scenes[idx].classList.contains('video-scene')){
+    const vid=scenes[idx].querySelector('video');
+    vid.currentTime=0; vid.muted=false;
+    const pr=vid.play();
+    if(pr) pr.catch(()=>{});
+  }
+  if(running && !paused){
+    timer=setTimeout(()=>next(),durations[idx]*1000);
+  }
+}
+function next(){
+  if(idx>=scenes.length-1){ finish(); return; }
+  elapsedBefore=durations.slice(0,idx+1).reduce((a,b)=>a+b,0);
+  activate(idx+1);
+}
+function prev(){
+  if(idx<=0) return;
+  elapsedBefore=durations.slice(0,idx-1).reduce((a,b)=>a+b,0);
+  activate(idx-1,true);
+}
+function restart(){
+  elapsedBefore=0; paused=false; pauseBadge.style.display='none'; running=true; activate(0);
+}
+function finish(){
+  clearTimeout(timer); running=false; elapsedBefore=total; progress.style.width='100%';
+  if(v2) v2.pause();
+}
+function togglePause(){
+  if(!running) return;
+  paused=!paused;
+  pauseBadge.style.display=paused?'block':'none';
+  const vid=scenes[idx].querySelector('video');
+  if(paused){
+    clearTimeout(timer); pauseAt=performance.now();
+    if(vid) vid.pause();
+  } else {
+    if(vid) vid.play().catch(()=>{});
+    sceneStart += performance.now()-pauseAt;
+    const used=(performance.now()-sceneStart)/1000;
+    timer=setTimeout(()=>next(),Math.max(0,durations[idx]-used)*1000);
+  }
+}
+function updateProgress(){
+  if(running){
+    let local=paused ? (pauseAt-sceneStart)/1000 : (performance.now()-sceneStart)/1000;
+    local=Math.max(0,Math.min(durations[idx],local));
+    progress.style.width=(100*(elapsedBefore+local)/total)+'%';
+  }
+  requestAnimationFrame(updateProgress);
+}
+requestAnimationFrame(updateProgress);
+
+document.getElementById('startBtn').addEventListener('click',async()=>{
+  document.getElementById('start').style.display='none';
+  try{ await document.documentElement.requestFullscreen(); }catch(e){}
+  running=true; elapsedBefore=0; activate(0);
+});
+
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('start').style.display!=='none' && (e.key==='Enter'||e.key===' ')){
+    document.getElementById('startBtn').click(); return;
+  }
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault(); next();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault(); prev();}
+  else if(e.key.toLowerCase()==='p') togglePause();
+  else if(e.key.toLowerCase()==='r') restart();
+  else if(e.key.toLowerCase()==='f'){ if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
+});
+
+document.addEventListener('click',e=>{
+  if(e.target.closest('#start')) return;
+  if(e.clientX>innerWidth*.82) next();
+  else if(e.clientX<innerWidth*.18) prev();
+});
+</script>
+</body>
+</html>
